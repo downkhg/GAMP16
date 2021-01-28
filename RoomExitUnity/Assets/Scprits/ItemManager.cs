@@ -17,7 +17,7 @@ public class Item
 
 public class ItemManager : MonoBehaviour
 {
-    public enum E_ITEM { KEY01, KEY02 , KEY03 , KEY04, KEY, MAX }
+    public enum E_ITEM { NONE = -1,KEY01, KEY02 , KEY03 , KEY04, KEY, MAX }
     List<Item> listItems; //vector와 동일함. 동적배열
 
     public void Initialized()

@@ -5,6 +5,24 @@ using UnityEngine;
 public class Dynamic : MonoBehaviour
 {
     public float m_fSpeed;
+
+    public List<ItemManager.E_ITEM> m_listInventory;
+
+    public void SetInventory(ItemManager.E_ITEM item)
+    {
+        m_listInventory.Add(item);
+    }
+
+    public ItemManager.E_ITEM GetIventory(int idx)
+    {
+        return m_listInventory[idx];
+    }
+
+    public void DeleteIventoryItem(ItemManager.E_ITEM item)
+    {
+        m_listInventory.Remove(item);
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -29,6 +47,45 @@ public class Dynamic : MonoBehaviour
         if (Input.GetKey(KeyCode.LeftArrow))
         {
             transform.Rotate(Vector3.down * 1);
+        }
+
+        if(Input.GetMouseButtonDown(0))
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit raycastHit;
+            float fDist = 10.0f;
+            Debug.DrawLine(ray.origin, ray.origin + ray.direction*fDist, Color.red);
+            if(Physics.Raycast(ray,out raycastHit,fDist))
+            {
+                GameObject objCollision = raycastHit.collider.gameObject;
+                Debug.Log(objCollision.name);
+
+                RoomObject roomObject = objCollision.GetComponent<RoomObject>();
+                if (roomObject)
+                    roomObject.CheckItem(this);
+            }
+        }
+
+    }
+
+    private void OnGUI()
+    {
+        int idx = 0;
+        foreach(ItemManager.E_ITEM item in m_listInventory)
+        {
+            GUI.Box(new Rect(0, 20 * idx, 100, 20), item.ToString());
+            idx++;
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+       GameObject  objCollison =  collision.gameObject;
+        if(objCollison)
+        {
+            RoomObject roomObject = objCollison.GetComponent<RoomObject>();
+            if(roomObject)
+                roomObject.CheckItem(this);
         }
     }
 }
