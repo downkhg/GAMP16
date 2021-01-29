@@ -61,7 +61,8 @@ public class Dynamic : MonoBehaviour
                 Debug.Log(objCollision.name);
 
                 RoomObject roomObject = objCollision.GetComponent<RoomObject>();
-                if (roomObject)
+                if (roomObject && 
+                    roomObject.tag == "Book")
                     roomObject.CheckItem(this);
             }
         }
@@ -77,10 +78,11 @@ public class Dynamic : MonoBehaviour
             idx++;
         }
     }
-
+    //충돌체끼리 물리리연산으로 충돌할때 호출되는 함수.
     private void OnCollisionEnter(Collision collision)
     {
        GameObject  objCollison =  collision.gameObject;
+        Debug.Log("CollisonEnter:"+objCollison.name);
         if(objCollison)
         {
             RoomObject roomObject = objCollison.GetComponent<RoomObject>();
