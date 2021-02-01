@@ -8,11 +8,16 @@ public class DoorAsix : MonoBehaviour
     public float m_fMaxAngle;
 
     public bool m_bOpen = false;
-    public bool m_bStop = false;
+    public bool m_bStop = true;
   
     public void Open()
     {
         m_bStop = false;
+    }
+
+    private void Start()
+    {
+        m_bStop = true;
     }
 
     // Update is called once per frame

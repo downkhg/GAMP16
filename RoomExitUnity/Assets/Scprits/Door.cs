@@ -5,6 +5,7 @@ using UnityEngine;
 public class Door : MonoBehaviour
 {
     public DoorAsix m_cDoorAsix;
+    public bool m_bLook = false;
 
     public void Open()
     {
@@ -13,6 +14,7 @@ public class Door : MonoBehaviour
 
     private void OnMouseDown()
     {
-        m_cDoorAsix.Open();
+        if(m_bLook == false)
+            m_cDoorAsix.Open();
     }
 }

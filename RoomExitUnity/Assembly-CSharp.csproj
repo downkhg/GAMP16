@@ -64,10 +64,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scprits\Closet.cs" />
     <Compile Include="Assets\Scprits\Door.cs" />
     <Compile Include="Assets\Scprits\DoorAsix.cs" />
+    <Compile Include="Assets\Scprits\DoorObject.cs" />
     <Compile Include="Assets\Scprits\Dynamic.cs" />
+    <Compile Include="Assets\Scprits\ExitDoor.cs" />
     <Compile Include="Assets\Scprits\ItemManager.cs" />
     <Compile Include="Assets\Scprits\RoomObject.cs" />
     <Compile Include="Assets\Scprits\ToolKit.cs" />
