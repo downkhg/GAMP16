@@ -69,6 +69,8 @@
     <Compile Include="Assets\Scprits\DoorObject.cs" />
     <Compile Include="Assets\Scprits\Dynamic.cs" />
     <Compile Include="Assets\Scprits\ExitDoor.cs" />
+    <Compile Include="Assets\Scprits\GUIManager.cs" />
+    <Compile Include="Assets\Scprits\GameManager.cs" />
     <Compile Include="Assets\Scprits\ItemManager.cs" />
     <Compile Include="Assets\Scprits\RoomObject.cs" />
     <Compile Include="Assets\Scprits\ToolKit.cs" />

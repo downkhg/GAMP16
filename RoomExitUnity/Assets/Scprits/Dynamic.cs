@@ -8,6 +8,9 @@ public class Dynamic : MonoBehaviour
     public float m_fJumpPower;
     public List<ItemManager.E_ITEM> m_listInventory;
 
+    public int m_nTimmerCount = 0;
+    public int m_nMaxTimmer = 180;
+
     public void SetInventory(ItemManager.E_ITEM item)
     {
         m_listInventory.Add(item);
@@ -40,9 +43,18 @@ public class Dynamic : MonoBehaviour
         
     }
 
+    float m_fTimeCounter;
+
     // Update is called once per frame
     void Update()
     {
+        m_fTimeCounter += Time.deltaTime;
+        if (m_fTimeCounter >= 1)
+        {
+            m_fTimeCounter -= 1;
+            m_nTimmerCount++;
+        }
+
         if(Input.GetKey(KeyCode.UpArrow))
         {
             transform.Translate(Vector3.forward * m_fSpeed * Time.deltaTime);
@@ -66,8 +78,7 @@ public class Dynamic : MonoBehaviour
         {
             Rigidbody rigidbody = this.gameObject.GetComponent<Rigidbody>();
             rigidbody.AddForce(Vector3.up * m_fJumpPower);
-        }
-
+        } 
     }
 
     private void FixedUpdate()
