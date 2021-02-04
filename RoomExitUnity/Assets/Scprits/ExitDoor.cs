@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class ExitDoor : DoorObject
 {
+    public bool CheckOpenDoor()
+    {
+        return m_cDoor.m_cDoorAsix.m_bOpen;
+    }
     void Start()
     {
         m_cDoor.m_bLook = true;    

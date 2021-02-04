@@ -3237,6 +3237,7 @@ MonoBehaviour:
   m_eCurStatus: 0
   m_listScence: []
   m_textTimmer: {fileID: 813089827}
+  m_cGameManager: {fileID: 0}
 --- !u!1 &1163212804
 GameObject:
   m_ObjectHideFlags: 0

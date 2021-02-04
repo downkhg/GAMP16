@@ -11,6 +11,11 @@ public class Dynamic : MonoBehaviour
     public int m_nTimmerCount = 0;
     public int m_nMaxTimmer = 180;
 
+    public bool CheckGameOver()
+    {
+        return (m_nTimmerCount >= m_nMaxTimmer);
+    }
+
     public void SetInventory(ItemManager.E_ITEM item)
     {
         m_listInventory.Add(item);
