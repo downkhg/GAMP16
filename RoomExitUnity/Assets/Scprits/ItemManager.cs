@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
 public class Item
 {
     public string name;
@@ -18,9 +20,10 @@ public class Item
 public class ItemManager : MonoBehaviour
 {
     public enum E_ITEM { NONE = -1,KEY01, KEY02 , KEY03 , KEY04, KEY, MAX }
+    [SerializeField]
     List<Item> listItems; //vector와 동일함. 동적배열
 
-    public void Initialized()
+    public void Initialize()
     {
         int nCapacity = (int)E_ITEM.MAX;
         listItems = new List<Item>(nCapacity);//배열을 5개까지 할당할수있는 메모리를 확보
@@ -46,12 +49,17 @@ public class ItemManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        Initialize();
     }
 
     // Update is called once per frame
     void Update()
     {
         
+    }
+
+    private void OnDestroy()
+    {
+        Release();
     }
 }
