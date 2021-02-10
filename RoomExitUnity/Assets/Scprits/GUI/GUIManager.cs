@@ -9,6 +9,26 @@ public class GUIManager : MonoBehaviour
     public E_SCENCE_STATUS m_eCurStatus;
     public List<GameObject> m_listScence;
 
+    public GUIIventory m_guiInventory;
+    public GameObject m_objPopupLayer;
+
+    public void ShowPopupLayer()
+    {
+
+        if (m_objPopupLayer.activeSelf == true)
+        {
+            m_objPopupLayer.SetActive(false);
+            m_guiInventory.Show(false);
+        }
+        else
+        {
+           
+            m_objPopupLayer.SetActive(true);
+            m_guiInventory.Show(true);
+        }
+       
+    }
+
     public Text m_textTimmer;
 
     public GameManager m_cGameManager;
@@ -58,6 +78,8 @@ public class GUIManager : MonoBehaviour
             case E_SCENCE_STATUS.PLAY:
                 Time.timeScale = 1;
                 m_cGameManager.InitRoomObject();
+
+               
                 break;
         }
         ShowScence(status);
@@ -80,6 +102,11 @@ public class GUIManager : MonoBehaviour
             case E_SCENCE_STATUS.PLAY:
                 Dynamic player = m_cGameManager.m_cPlayer;
                 SetTimmer(player.m_nTimmerCount, player.m_nMaxTimmer);
+
+                if (Input.GetKeyDown(KeyCode.I))
+                {
+                    ShowPopupLayer();
+                }
                 break;
         }
     }

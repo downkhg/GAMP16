@@ -38,7 +38,18 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         m_cInstance = this;
+
+        m_cPlayer.SetInventory(ItemManager.E_ITEM.KEY);
+        m_cPlayer.SetInventory(ItemManager.E_ITEM.KEY01);
+        m_cPlayer.SetInventory(ItemManager.E_ITEM.KEY02);
+        m_cPlayer.SetInventory(ItemManager.E_ITEM.KEY03);
+        m_cPlayer.SetInventory(ItemManager.E_ITEM.KEY04);
         Debug.Log("GameManager::Awake()");
+    }
+
+    private void Start()
+    {
+       
     }
 
     private void FixedUpdate()

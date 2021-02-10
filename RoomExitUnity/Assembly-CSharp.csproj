@@ -70,6 +70,8 @@
     <Compile Include="Assets\Scprits\Dynamic.cs" />
     <Compile Include="Assets\Scprits\ExitDoor.cs" />
     <Compile Include="Assets\Scprits\GUI\GUIItemInfo.cs" />
+    <Compile Include="Assets\Scprits\GUI\GUIItemList.cs" />
+    <Compile Include="Assets\Scprits\GUI\GUIIventory.cs" />
     <Compile Include="Assets\Scprits\GUI\GUIManager.cs" />
     <Compile Include="Assets\Scprits\GameManager.cs" />
     <Compile Include="Assets\Scprits\ItemManager.cs" />
