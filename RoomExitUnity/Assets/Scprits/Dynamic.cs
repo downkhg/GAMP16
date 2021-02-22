@@ -5,7 +5,15 @@ using UnityEngine;
 public class Dynamic : MonoBehaviour
 {
     public float m_fSpeed;
+    public float m_fAngleSpeed;
     public float m_fJumpPower;
+    public float m_fShotPower;
+    
+
+    public float m_fSite;
+
+    public Collider m_colliderTarget;
+
     public List<ItemManager.E_ITEM> m_listInventory;
 
     public int m_nTimmerCount = 0;
@@ -45,68 +53,116 @@ public class Dynamic : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+      
     }
 
     float m_fTimeCounter;
 
+    public void Translate(Vector3 dir)
+    {
+        transform.Translate(dir * m_fSpeed * Time.deltaTime);
+    }
+
+    public void Rotation(Vector3 axis)
+    {
+        transform.Rotate(axis * m_fAngleSpeed);
+    }
+
+    public void Jump(Rigidbody rigidbody)
+    {
+        rigidbody.AddForce(Vector3.up * m_fJumpPower);
+    }
+
+    public void Attack()
+    {
+        //GameObject prefapsBullet = new GameObject();
+        //Rigidbody rigidbody = prefapsBullet.AddComponent<Rigidbody>();
+        //rigidbody.useGravity = false;
+        //MeshFilter meshFilter = prefapsBullet.AddComponent<MeshFilter>();
+
+        //Mesh mesh = new Mesh();
+        //mesh.vertices = new Vector3[3];
+        //mesh.vertices[0] = new Vector3(0.5f, 0.5f, 0);
+        //mesh.vertices[1] = new Vector3(-0.5f, 0.5f, 0);
+        //mesh.vertices[2] = new Vector3(-0.5f, -0.5f, 0);
+
+        //Debug.DrawLine(mesh.vertices[0], mesh.vertices[1]);
+        //Debug.DrawLine(mesh.vertices[1], mesh.vertices[2]);
+        //Debug.DrawLine(mesh.vertices[2], mesh.vertices[0]);
+
+        //mesh.normals = new Vector3[3];
+        //mesh.normals[0] = Vector3.forward;
+        //mesh.normals[1] = Vector3.forward;
+        //mesh.normals[2] = Vector3.forward;
+
+        //meshFilter.mesh = mesh;
+        //SphereCollider sphereCollider = prefapsBullet.AddComponent<SphereCollider>();
+        //MeshRenderer meshRenderer = prefapsBullet.AddComponent<MeshRenderer>();
+        //Material material = Resources.Load("Materials/Wall") as Material;
+        //Renderer renderer = prefapsBullet.GetComponent<Renderer>();
+        //renderer.material = material;
+
+
+        //GameObject prefapsBullet = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        //Rigidbody rigidbody = prefapsBullet.AddComponent<Rigidbody>();
+        //rigidbody.useGravity = false;
+        //rigidbody.isKinematic = true;
+        //SphereCollider sphereCollider = prefapsBullet.AddComponent<SphereCollider>();
+        //sphereCollider.isTrigger = false;
+        //prefapsBullet.transform.position = transform.position;
+        //prefapsBullet.transform.rotation = transform.rotation;
+        //rigidbody.AddForce(Vector3.forward * m_fShotPower);
+
+        GameObject prefapsBullet = Resources.Load("Prefabs/Bullet") as GameObject;
+        GameObject objBullet = Instantiate(prefapsBullet, transform.position, transform.localRotation);
+        Rigidbody rigidbodyBullet = objBullet.GetComponent<Rigidbody>();
+        rigidbodyBullet.AddForce(transform.forward * 300);
+    }
+
+    void PrefabBullet()
+    {
+        GameObject prefapsBullet = Resources.Load("Prefabs/Bullet") as GameObject;
+        GameObject objBullet = Instantiate(prefapsBullet, transform.position, transform.localRotation);
+        Rigidbody rigidbodyBullet = objBullet.GetComponent<Rigidbody>();
+        rigidbodyBullet.AddForce(transform.forward * 300);
+    }
+
     // Update is called once per frame
     void Update()
     {
-        m_fTimeCounter += Time.deltaTime;
-        if (m_fTimeCounter >= 1)
-        {
-            m_fTimeCounter -= 1;
-            m_nTimmerCount++;
-        }
-
-        if(Input.GetKey(KeyCode.UpArrow))
-        {
-            transform.Translate(Vector3.forward * m_fSpeed * Time.deltaTime);
-        }
-        if (Input.GetKey(KeyCode.DownArrow))
-        {
-            transform.Translate(Vector3.back * m_fSpeed * Time.deltaTime);
-        }
-        if (Input.GetKey(KeyCode.RightArrow))
-        {
-            transform.Rotate(Vector3.up * 1);
-        }
-        if (Input.GetKey(KeyCode.LeftArrow))
-        {
-            transform.Rotate(Vector3.down * 1);
-        }
-
-       
-
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            Rigidbody rigidbody = this.gameObject.GetComponent<Rigidbody>();
-            rigidbody.AddForce(Vector3.up * m_fJumpPower);
-        } 
+        
     }
 
     private void FixedUpdate()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit raycastHit;
-            float fDist = 10.0f;
-            //레이어 충돌체크시에 필요한 레이어만 충돌체크하도록 설정할수있다.
-            int nLayer = 1 << LayerMask.NameToLayer("RoomObject");
-            Debug.DrawLine(ray.origin, ray.origin + ray.direction * fDist, Color.red);
-            if (Physics.Raycast(ray, out raycastHit, fDist, nLayer))
-            {
-                GameObject objCollision = raycastHit.collider.gameObject;
-                Debug.Log(objCollision.name);
+        
+    }
 
-                RoomObject roomObject = objCollision.GetComponent<RoomObject>();
-                if (roomObject &&
-                    roomObject.tag == "ClickEvent")
-                    roomObject.CheckItem(this);
-            }
+    public Collider ProcessFindNearCollider(string strLayerName)
+    {
+        int nLayer = 1 << LayerMask.NameToLayer(strLayerName);
+        Collider[] colliders = Physics.OverlapSphere(this.transform.position, m_fSite, nLayer);
+
+        Collider colliderMin = null;
+        float fPreDist = 99999999.0f;
+        //찾은대상중 가장 가까운 대상을 찾는다.
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            Collider collider = colliders[i];
+            float fDist = Vector3.Distance(collider.transform.position, this.transform.position);
+
+            if (colliderMin == null || fPreDist > fDist)
+                colliderMin = collider;
+            fPreDist = fDist;
+            Debug.Log(string.Format("[{0}]{1}:{2}", i, collider.gameObject.name, fDist));
         }
+
+        return colliderMin;
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(this.transform.position, m_fSite);
     }
 
     private void OnGUI()
@@ -126,21 +182,6 @@ public class Dynamic : MonoBehaviour
         if(objCollison)
         {
             if (objCollison.tag == "CollisionEvent")
-            {
-                RoomObject roomObject = objCollison.GetComponent<RoomObject>();
-                if (roomObject)
-                    roomObject.CheckItem(this);
-            }
-        }
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        GameObject objCollison = other.gameObject;
-        Debug.Log("TriggeEnter:" + objCollison.name);
-        if (objCollison)
-        {
-            if (objCollison.tag == "TriggerEvent")
             {
                 RoomObject roomObject = objCollison.GetComponent<RoomObject>();
                 if (roomObject)

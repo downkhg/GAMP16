@@ -64,6 +64,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scprits\AIController.cs" />
     <Compile Include="Assets\Scprits\Door.cs" />
     <Compile Include="Assets\Scprits\DoorAsix.cs" />
     <Compile Include="Assets\Scprits\DoorObject.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="Assets\Scprits\GUI\GUIManager.cs" />
     <Compile Include="Assets\Scprits\GameManager.cs" />
     <Compile Include="Assets\Scprits\ItemManager.cs" />
+    <Compile Include="Assets\Scprits\PlayerController.cs" />
     <Compile Include="Assets\Scprits\RoomObject.cs" />
     <Compile Include="Assets\Scprits\ToolKit.cs" />
     <None Include="Assets\Scprits\ClassDiagram1.cd" />
