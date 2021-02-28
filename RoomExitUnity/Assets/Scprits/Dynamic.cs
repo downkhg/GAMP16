@@ -4,12 +4,22 @@ using UnityEngine;
 
 public class Dynamic : MonoBehaviour
 {
-    public float m_fSpeed;
-    public float m_fAngleSpeed;
-    public float m_fJumpPower;
-    public float m_fShotPower;
+    [SerializeField]
+    float m_fSpeed;
+    [SerializeField]
+    float m_fAngleSpeed;
+    [SerializeField]
+    float m_fJumpPower;
+    [SerializeField]
+    float m_fShotPower;
+    [SerializeField]
+    float m_fAttackRange;
 
-    public float m_fAttackRange;
+    public float Speed { get { return m_fSpeed; } }
+    public float AngleSpeed { get { return m_fAngleSpeed; } }
+    public float JumpPower { get { return m_fJumpPower; } }
+    public float ShotPower { get { return m_fShotPower; } }
+    public float AttakRange { get { return m_fAttackRange; } }
 
     public Gun m_cGun;
     
@@ -59,21 +69,6 @@ public class Dynamic : MonoBehaviour
     }
 
     float m_fTimeCounter;
-
-    public void Translate(Transform trans, Vector3 dir)
-    {
-        trans.Translate(dir * m_fSpeed * Time.deltaTime);
-    }
-
-    public void Rotation(Transform trans, Vector3 axis)
-    {
-        trans.Rotate(axis * m_fAngleSpeed);
-    }
-
-    public void Jump(Rigidbody rigidbody)
-    {
-        rigidbody.AddForce(Vector3.up * m_fJumpPower);
-    }
 
     public void Attack()
     {

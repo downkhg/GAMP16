@@ -49,11 +49,8 @@ public struct Timmer
     }
 }
 
-public class AIController : MonoBehaviour
+public class AIController : Controller
 {
-    [SerializeField]
-    Dynamic m_dynamicPlayer;
-
     public enum E_AI_STATE { ATTAK, MOVE, SEARCH, LOOKAT }
     public E_AI_STATE m_eCurState;
 
@@ -72,31 +69,35 @@ public class AIController : MonoBehaviour
         {
             case E_AI_STATE.ATTAK:
                 m_sAttackTimmer = new Timmer(1);
-                m_dynamicPlayer.Attack();
+                Dynamic.Attack();
                 m_sAttackTimmer.StartTimmer();
                 break;
             case E_AI_STATE.MOVE:
-                transform.LookAt(m_dynamicPlayer.m_colliderTarget.transform);
+                //만약, 회전시 생길수있는 오차를 보정하기위해서 사용함.
+                Vector3 vTargetPos = Dynamic.m_colliderTarget.transform.position;
+                vTargetPos.y = transform.position.y;
+                transform.LookAt(vTargetPos);
                 break;
             case E_AI_STATE.SEARCH:
 
                 break;
             case E_AI_STATE.LOOKAT:
-                if (m_dynamicPlayer.m_colliderTarget)
+                if (Dynamic.m_colliderTarget)
                 {
                     Vector3 vDir = transform.forward;
                     Vector3 vPos = transform.position;
-                    Vector3 vTaregtPos = m_dynamicPlayer.m_colliderTarget.gameObject.transform.position;
+                    Vector3 vTaregtPos = Dynamic.m_colliderTarget.gameObject.transform.position;
+                    vTargetPos.y = transform.position.y;
                     Vector3 vToTarget = vTaregtPos - vPos;
 
                     float fAngle = Vector3.Angle(vDir, vToTarget.normalized);
                     float fDot = Vector3.Dot(vDir, vToTarget.normalized);
                     float fRad = Mathf.Acos(fDot);
-                    if (fDot > 0)
-                        m_vRotAsix = Vector3.up;
+                    if (fDot > 0) //각도의 방향에 따라 축을 변경하여, 
+                        m_vRotAsix = Vector3.up; //시계방향
                     else
-                        m_vRotAsix = Vector3.down;
-                    m_fRotAngle = Mathf.Rad2Deg * fRad;
+                        m_vRotAsix = Vector3.down; //반시계방향
+                    m_fRotAngle = Mathf.Rad2Deg * fRad;//라디안을 각도로 변환
                 }
                 else
                 {
@@ -109,29 +110,41 @@ public class AIController : MonoBehaviour
 
     public void UpdateState()
     {
+        Dynamic.m_colliderTarget = ProcessFindNearCollider("Player");
+
         switch (m_eCurState)
         {
             case E_AI_STATE.ATTAK:
-                if (m_dynamicPlayer.m_colliderTarget)
+                if (Dynamic.m_colliderTarget)
                 {
-                    m_sAttackTimmer.UpdateTimmer();
-                    if (m_sAttackTimmer.CheckTimmer())
-                        m_dynamicPlayer.Attack();
+                    if (RaycastForword("Player", Dynamic.AttakRange))
+                    {
+                        m_sAttackTimmer.UpdateTimmer();
+                        if (m_sAttackTimmer.CheckTimmer())
+                            Dynamic.Attack();
+                    }
+                    else
+                        SetState(E_AI_STATE.LOOKAT);
                 }
                 else
                     SetState(E_AI_STATE.SEARCH);
                 break;
             case E_AI_STATE.MOVE:
-                if (m_dynamicPlayer.m_colliderTarget)
+                if (Dynamic.m_colliderTarget)
                 {
-                    Vector3 vPos = transform.position;
-                    Vector3 vTargetPos = m_dynamicPlayer.m_colliderTarget.transform.position;
+                    if (RaycastForword("Player",m_fSite))
+                    {
+                        Vector3 vPos = transform.position;
+                        Vector3 vTargetPos = Dynamic.m_colliderTarget.transform.position;
 
-                    float fDist = Vector3.Distance(vPos, vTargetPos);
-                    if (fDist > m_dynamicPlayer.m_fAttackRange)
-                        m_dynamicPlayer.Translate(transform, Vector3.forward);
+                        float fDist = Vector3.Distance(vPos, vTargetPos);
+                        if (fDist > Dynamic.AttakRange)
+                            Translate(Vector3.forward,Dynamic.Speed);
+                        else
+                            SetState(E_AI_STATE.ATTAK);
+                    }
                     else
-                        SetState(E_AI_STATE.ATTAK);
+                        SetState(E_AI_STATE.LOOKAT);
                 }
                 else
                 {
@@ -139,18 +152,14 @@ public class AIController : MonoBehaviour
                 }
                 break;
             case E_AI_STATE.SEARCH:
-                if (m_dynamicPlayer.m_colliderTarget == null)
-                {
-                    m_dynamicPlayer.m_colliderTarget = ProcessFindNearCollider("Player");
-                }
-                else
+                if (Dynamic.m_colliderTarget != null)
                     SetState(E_AI_STATE.LOOKAT);
                 break;
             case E_AI_STATE.LOOKAT:
                 if (m_fCurRotAngle <= m_fRotAngle)
                 {
-                    m_dynamicPlayer.Rotation(transform, m_vRotAsix);
-                    m_fCurRotAngle += m_dynamicPlayer.m_fAngleSpeed;
+                    Rotation(m_vRotAsix, Dynamic.AngleSpeed);
+                    m_fCurRotAngle += Dynamic.AngleSpeed;
                 }
                 else
                 {
@@ -160,6 +169,10 @@ public class AIController : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        base.GetRigidbody();
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -177,6 +190,15 @@ public class AIController : MonoBehaviour
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(this.transform.position, m_fSite);
+    }
+
+    public bool RaycastForword(string strLayerName, float dist)
+    {
+        Vector3 vPos = transform.position;
+        vPos.y = Dynamic.transform.position.y;
+        Ray ray = new Ray(vPos, transform.forward);
+        Debug.DrawLine(vPos, vPos + ray.direction * dist);
+        return Physics.Raycast(ray, dist, 1 << LayerMask.NameToLayer(strLayerName));
     }
 
     public Collider ProcessFindNearCollider(string strLayerName)

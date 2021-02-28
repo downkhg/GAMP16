@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scprits\AIController.cs" />
     <Compile Include="Assets\Scprits\Bullet.cs" />
+    <Compile Include="Assets\Scprits\Controller.cs" />
     <Compile Include="Assets\Scprits\Door.cs" />
     <Compile Include="Assets\Scprits\DoorAsix.cs" />
     <Compile Include="Assets\Scprits\DoorObject.cs" />
