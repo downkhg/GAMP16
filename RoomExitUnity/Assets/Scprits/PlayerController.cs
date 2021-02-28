@@ -23,7 +23,7 @@ public class PlayerController : Controller
         }
         if (Input.GetKey(KeyCode.RightArrow))
         {
-            Rotation(Vector3.up, Dynamic.Speed);
+            Rotation(Vector3.up, Dynamic.AngleSpeed);
         }
         if (Input.GetKey(KeyCode.LeftArrow))
         {

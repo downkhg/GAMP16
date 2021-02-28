@@ -111,11 +111,11 @@ public class AIController : Controller
     public void UpdateState()
     {
         Dynamic.m_colliderTarget = ProcessFindNearCollider("Player");
+        if (!Dynamic.m_colliderTarget) SetState(E_AI_STATE.SEARCH);
 
         switch (m_eCurState)
         {
             case E_AI_STATE.ATTAK:
-                if (Dynamic.m_colliderTarget)
                 {
                     if (RaycastForword("Player", Dynamic.AttakRange))
                     {
@@ -126,11 +126,8 @@ public class AIController : Controller
                     else
                         SetState(E_AI_STATE.LOOKAT);
                 }
-                else
-                    SetState(E_AI_STATE.SEARCH);
                 break;
             case E_AI_STATE.MOVE:
-                if (Dynamic.m_colliderTarget)
                 {
                     if (RaycastForword("Player",m_fSite))
                     {
@@ -145,10 +142,6 @@ public class AIController : Controller
                     }
                     else
                         SetState(E_AI_STATE.LOOKAT);
-                }
-                else
-                {
-                    SetState(E_AI_STATE.SEARCH);
                 }
                 break;
             case E_AI_STATE.SEARCH:
