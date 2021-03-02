@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.AI;
 
 public struct Timmer
 {
@@ -61,6 +61,8 @@ public class AIController : Controller
     public float m_fRotAngle;
     public float m_fCurRotAngle;
     public Vector3 m_vRotAsix;
+
+    public NavMeshAgent m_navMashAgent;
 
     public void SetState(E_AI_STATE state)
     {
@@ -139,7 +141,11 @@ public class AIController : Controller
 
                         float fDist = Vector3.Distance(vPos, vTargetPos);
                         if (fDist > Dynamic.AttakRange)
-                            Translate(Vector3.forward,Dynamic.Speed);
+                        {
+                            m_navMashAgent.SetDestination(vTargetPos);
+                            Rigidbody.velocity = Vector3.zero;
+                        }
+                        //Translate(Vector3.forward,Dynamic.Speed);
                         else
                             SetState(E_AI_STATE.ATTAK);
                     }
@@ -150,7 +156,8 @@ public class AIController : Controller
             case E_AI_STATE.SEARCH:
                 if (CheckTarget())
                 {
-                    if(CheckRaycastBetween("Wall",transform.position, Dynamic.m_colliderTarget.transform.position ))
+                    if(!CheckRaycastBetween("Wall",transform.position, Dynamic.m_colliderTarget.transform.position ))
+                    //if(ActionCheckWall() != E_ACTION_RESURT.SUCCESS)
                         SetState(E_AI_STATE.LOOKAT);
                 }
                 break;
@@ -274,6 +281,7 @@ public class AIController : Controller
 
     private void Awake()
     {
+        m_navMashAgent = GetComponent<NavMeshAgent>();
         base.GetRigidbody();
     }
 
