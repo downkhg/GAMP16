@@ -62,7 +62,6 @@ public class AIController : Controller
     public float m_fCurRotAngle;
     public Vector3 m_vRotAsix;
 
-
     public void SetState(E_AI_STATE state)
     {
         switch (state)
@@ -74,21 +73,24 @@ public class AIController : Controller
                 break;
             case E_AI_STATE.MOVE:
                 //만약, 회전시 생길수있는 오차를 보정하기위해서 사용함.
-                Vector3 vTargetPos = Dynamic.m_colliderTarget.transform.position;
-                vTargetPos.y = transform.position.y;
-                transform.LookAt(vTargetPos);
+                if (CheckTarget())
+                {
+                    Vector3 vTargetPos = Dynamic.m_colliderTarget.transform.position;
+                    vTargetPos.y = transform.position.y;
+                    transform.LookAt(vTargetPos);
+                }
                 break;
             case E_AI_STATE.SEARCH:
 
                 break;
             case E_AI_STATE.LOOKAT:
-                if (Dynamic.m_colliderTarget)
+                if (CheckTarget())
                 {
                     Vector3 vDir = transform.forward;
                     Vector3 vPos = transform.position;
-                    Vector3 vTaregtPos = Dynamic.m_colliderTarget.gameObject.transform.position;
+                    Vector3 vTargetPos = Dynamic.m_colliderTarget.gameObject.transform.position;
                     vTargetPos.y = transform.position.y;
-                    Vector3 vToTarget = vTaregtPos - vPos;
+                    Vector3 vToTarget = vTargetPos - vPos;
 
                     float fAngle = Vector3.Angle(vDir, vToTarget.normalized);
                     float fDot = Vector3.Dot(vDir, vToTarget.normalized);
@@ -98,6 +100,7 @@ public class AIController : Controller
                     else
                         m_vRotAsix = Vector3.down; //반시계방향
                     m_fRotAngle = Mathf.Rad2Deg * fRad;//라디안을 각도로 변환
+                    m_fCurRotAngle = 0;
                 }
                 else
                 {
@@ -110,14 +113,14 @@ public class AIController : Controller
 
     public void UpdateState()
     {
-        Dynamic.m_colliderTarget = ProcessFindNearCollider("Player");
-        if (!Dynamic.m_colliderTarget) SetState(E_AI_STATE.SEARCH);
+        ActionFindNear();
+        if (!CheckTarget()) SetState(E_AI_STATE.SEARCH);
 
         switch (m_eCurState)
         {
             case E_AI_STATE.ATTAK:
                 {
-                    if (RaycastForword("Player", Dynamic.AttakRange))
+                    if (CheckRaycastForword("Player", Dynamic.AttakRange))
                     {
                         m_sAttackTimmer.UpdateTimmer();
                         if (m_sAttackTimmer.CheckTimmer())
@@ -129,7 +132,7 @@ public class AIController : Controller
                 break;
             case E_AI_STATE.MOVE:
                 {
-                    if (RaycastForword("Player",m_fSite))
+                    if (CheckRaycastForword("Player",m_fSite))
                     {
                         Vector3 vPos = transform.position;
                         Vector3 vTargetPos = Dynamic.m_colliderTarget.transform.position;
@@ -145,8 +148,11 @@ public class AIController : Controller
                 }
                 break;
             case E_AI_STATE.SEARCH:
-                if (Dynamic.m_colliderTarget != null)
-                    SetState(E_AI_STATE.LOOKAT);
+                if (CheckTarget())
+                {
+                    if(CheckRaycastBetween("Wall",transform.position, Dynamic.m_colliderTarget.transform.position ))
+                        SetState(E_AI_STATE.LOOKAT);
+                }
                 break;
             case E_AI_STATE.LOOKAT:
                 if (m_fCurRotAngle <= m_fRotAngle)
@@ -162,36 +168,86 @@ public class AIController : Controller
         }
     }
 
-    private void Awake()
+    public enum E_ACTION_RESURT { FAILURE = -1, RUNNING,  SUCCESS  }
+
+    public E_ACTION_RESURT BooleanToActionResult(bool check)
     {
-        base.GetRigidbody();
+        return check ? E_ACTION_RESURT.SUCCESS : E_ACTION_RESURT.FAILURE;
     }
 
-    // Start is called before the first frame update
-    void Start()
+    public E_ACTION_RESURT ActionFindNear()
     {
-        SetState(m_eCurState);
+        Collider collider = ProcessFindNearCollider("Player");
+       
+        Dynamic.m_colliderTarget = collider;
+        return E_ACTION_RESURT.RUNNING;
+    }
+    public E_ACTION_RESURT ActionCheckWall()
+    {
+
+        Vector3 vPos = transform.position;
+        Vector3 vTarget = Dynamic.m_colliderTarget.transform.position;
+
+        if (CheckRaycastBetween("Wall", vPos, vTarget))
+        {
+            Dynamic.m_colliderTarget = null;
+            return E_ACTION_RESURT.SUCCESS;
+        }
+
+        return E_ACTION_RESURT.RUNNING;
     }
 
-    // Update is called once per frame
-    void Update()
+    public E_ACTION_RESURT ActionLookAt()
     {
-        UpdateState();
+        if (m_fCurRotAngle <= m_fRotAngle)
+        {
+            Rotation(m_vRotAsix, Dynamic.AngleSpeed);
+            m_fCurRotAngle += Dynamic.AngleSpeed;
+            return E_ACTION_RESURT.RUNNING;
+        }
+        else
+            return E_ACTION_RESURT.SUCCESS;
     }
 
-    private void OnDrawGizmos()
+    public E_ACTION_RESURT ActionMoveToTarget()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(this.transform.position, m_fSite);
+        if (CheckAttakRange())
+            return E_ACTION_RESURT.SUCCESS;
+        else
+            return E_ACTION_RESURT.RUNNING;
     }
 
-    public bool RaycastForword(string strLayerName, float dist)
+    public bool CheckTarget()
+    {
+        return Dynamic.m_colliderTarget ? true : false;
+    }
+
+    public bool CheckRaycastForword(string strLayerName, float dist)
     {
         Vector3 vPos = transform.position;
         vPos.y = Dynamic.transform.position.y;
         Ray ray = new Ray(vPos, transform.forward);
         Debug.DrawLine(vPos, vPos + ray.direction * dist);
         return Physics.Raycast(ray, dist, 1 << LayerMask.NameToLayer(strLayerName));
+    }
+
+    public bool CheckRaycastBetween(string strLayerName, Vector3 vPos, Vector3 vTarget)
+    {
+        vPos.y = Dynamic.transform.position.y;
+        Vector3 vDist = vTarget - vPos;
+        Ray ray = new Ray(vPos, vDist.normalized);
+        Debug.DrawLine(vPos, vTarget);
+        return Physics.Raycast(ray, vDist.magnitude, 1 << LayerMask.NameToLayer(strLayerName));
+    }
+
+    public bool CheckAttakRange()
+    {
+        Vector3 vPos = transform.position;
+        Vector3 vTargetPos = Dynamic.m_colliderTarget.transform.position;
+
+        float fDist = Vector3.Distance(vPos, vTargetPos);
+        if (fDist > Dynamic.AttakRange) return false;
+        return true;
     }
 
     public Collider ProcessFindNearCollider(string strLayerName)
@@ -216,4 +272,26 @@ public class AIController : Controller
         return colliderMin;
     }
 
+    private void Awake()
+    {
+        base.GetRigidbody();
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        SetState(m_eCurState);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        UpdateState();
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(this.transform.position, m_fSite);
+    }
 }
